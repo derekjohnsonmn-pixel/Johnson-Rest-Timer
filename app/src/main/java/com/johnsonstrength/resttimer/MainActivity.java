@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
     private int seconds;
     private CountDownTimer timer;
     private TextView display, status;
-    private Button main;
+    private Button main, stop;
     private LinearLayout root, presets;
     private boolean running = false;
     private final Handler handler = new Handler(android.os.Looper.getMainLooper());
@@ -44,6 +44,14 @@ public class MainActivity extends Activity {
         status = new TextView(this); status.setText("READY FOR YOUR NEXT SET"); status.setTextColor(Color.LTGRAY); status.setTextSize(15); status.setGravity(Gravity.CENTER); LinearLayout.LayoutParams sl = new LinearLayout.LayoutParams(-1,dp(52)); sl.topMargin=dp(20); root.addView(status,sl);
         display = new TextView(this); display.setTextColor(fg); display.setTextSize(80); display.setTypeface(Typeface.DEFAULT,Typeface.BOLD); display.setGravity(Gravity.CENTER); root.addView(display,new LinearLayout.LayoutParams(-1,dp(150)));
         main = new Button(this); main.setText("START REST"); main.setTextSize(27); main.setAllCaps(false); main.setTextColor(Color.WHITE); main.setBackgroundTintList(android.content.res.ColorStateList.valueOf(accent)); LinearLayout.LayoutParams mp = new LinearLayout.LayoutParams(-1,dp(145)); mp.topMargin=dp(18); root.addView(main,mp); main.setOnClickListener(v -> { if (!running) start(); });
+        stop = new Button(this); stop.setText("STOP"); stop.setAllCaps(false); stop.setTextSize(15);
+        stop.setTextColor(Color.WHITE);
+        stop.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(70,70,70)));
+        LinearLayout.LayoutParams stopParams = new LinearLayout.LayoutParams(dp(130), dp(45));
+        stopParams.gravity = Gravity.CENTER_HORIZONTAL; stopParams.topMargin = dp(6);
+        root.addView(stop, stopParams);
+        stop.setOnClickListener(v -> stopTimer());
+        stop.setVisibility(View.INVISIBLE);
         TextView hint = new TextView(this); hint.setText("REST DURATION"); hint.setTextColor(Color.LTGRAY); hint.setTextSize(14); hint.setGravity(Gravity.CENTER); LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(-1,dp(40)); hp.topMargin=dp(25); root.addView(hint,hp);
         presets = new LinearLayout(this); presets.setOrientation(LinearLayout.HORIZONTAL); root.addView(presets,new LinearLayout.LayoutParams(-1,dp(55)));
         for(int s:new int[]{60,90,120,180}) { Button p=new Button(this); p.setText(s+"s"); p.setTextSize(14); p.setAllCaps(false); LinearLayout.LayoutParams pp=new LinearLayout.LayoutParams(0,-1,1); pp.setMargins(dp(2),0,dp(2),0); presets.addView(p,pp); p.setOnClickListener(v -> choose(s)); }
@@ -78,6 +86,20 @@ public class MainActivity extends Activity {
 
         refresh(); handler.removeCallbacks(tick); handler.post(tick);
     }
+    private void stopTimer() {
+        if (!running) return;
+        completionPlayed = true;
+        handler.removeCallbacks(tick);
+        AlarmManager alarms = (AlarmManager)getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(this, RestAlarmReceiver.class);
+        PendingIntent alarm = PendingIntent.getBroadcast(this, 12, intent,
+            PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
+        if (alarms != null && alarm != null) alarms.cancel(alarm);
+        if (alarm != null) alarm.cancel();
+        getSharedPreferences("timer", Context.MODE_PRIVATE).edit().remove("end_wall").apply();
+        running = false;
+        refresh();
+    }
     private void refresh() {
         long end = getSharedPreferences("timer", Context.MODE_PRIVATE).getLong("end_wall", 0);
         running = end > System.currentTimeMillis();
@@ -88,10 +110,10 @@ public class MainActivity extends Activity {
         }
         if (running) {
             render((int)Math.ceil((end-System.currentTimeMillis())/1000.0));
-            status.setText("RESTING — RECOVER STRONG"); main.setText("COUNTING DOWN"); main.setEnabled(false); presets.setAlpha(.4f);
+            status.setText("RESTING — RECOVER STRONG"); main.setText("COUNTING DOWN"); main.setEnabled(false); stop.setVisibility(View.VISIBLE); presets.setAlpha(.4f);
         } else {
             render(seconds); status.setText(end == 0 ? "READY FOR YOUR NEXT SET" : "TIME TO LIFT!");
-            main.setText("START REST"); main.setEnabled(true); presets.setAlpha(1f);
+            main.setText("START REST"); main.setEnabled(true); stop.setVisibility(View.INVISIBLE); presets.setAlpha(1f);
         }
     }
     private void soundOptions() {
