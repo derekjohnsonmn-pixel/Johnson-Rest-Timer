@@ -30,6 +30,7 @@ public class MainActivity extends Activity {
     private boolean running = false;
     private final Handler handler = new Handler(android.os.Looper.getMainLooper());
     private long endWall;
+    private boolean completionPlayed = false;
     private final Runnable tick = new Runnable() { @Override public void run() { refresh(); if (running) handler.postDelayed(this, 250); } };
     private final int bg = Color.rgb(15,18,22), fg = Color.WHITE, accent = Color.rgb(239, 91, 46);
     private int dp(float v) { return (int)(getResources().getDisplayMetrics().density*v + .5f); }
@@ -53,26 +54,46 @@ public class MainActivity extends Activity {
     private void choose(int s) { if(running)return; seconds=s; getPreferences(0).edit().putInt("rest",s).apply(); render(s); }
     private void customTime() { if(running)return; EditText field=new EditText(this); field.setInputType(InputType.TYPE_CLASS_NUMBER); field.setHint("Seconds (e.g. 150)"); new android.app.AlertDialog.Builder(this).setTitle("Custom rest time").setView(field).setNegativeButton("Cancel",null).setPositiveButton("Save",(d,w)-> { try { int n=Integer.parseInt(field.getText().toString()); if(n>=1 && n<=3600)choose(n); }catch(Exception ignored){} }).show(); }
     private void start() {
+        completionPlayed = false;
         endWall = System.currentTimeMillis() + seconds * 1000L;
         getSharedPreferences("timer", Context.MODE_PRIVATE).edit().putLong("end_wall", endWall).apply();
         AlarmManager alarms = (AlarmManager)getSystemService(ALARM_SERVICE);
         Intent intent = new Intent(this, RestAlarmReceiver.class);
         PendingIntent alarm = PendingIntent.getBroadcast(this, 12, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        PendingIntent open = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        
-alarms.set(AlarmManager.RTC_WAKEUP, endWall, alarm);
+        // A denied or unavailable alarm must never crash the timer UI.
+        if (alarms != null) {
+            try {
+                alarms.set(AlarmManager.RTC_WAKEUP, endWall, alarm);
+            } catch (SecurityException | IllegalArgumentException ex) {
+                android.util.Log.w("JohnsonRest", "Background alarm unavailable", ex);
+            }
+        }
 
         refresh(); handler.removeCallbacks(tick); handler.post(tick);
     }
     private void refresh() {
         long end = getSharedPreferences("timer", Context.MODE_PRIVATE).getLong("end_wall", 0);
         running = end > System.currentTimeMillis();
+        if (!running && end != 0 && !completionPlayed) {
+            completionPlayed = true;
+            playCompletionTone();
+            getSharedPreferences("timer", Context.MODE_PRIVATE).edit().remove("end_wall").apply();
+        }
         if (running) {
             render((int)Math.ceil((end-System.currentTimeMillis())/1000.0));
             status.setText("RESTING — RECOVER STRONG"); main.setText("COUNTING DOWN"); main.setEnabled(false); presets.setAlpha(.4f);
         } else {
             render(seconds); status.setText(end == 0 ? "READY FOR YOUR NEXT SET" : "TIME TO LIFT!");
             main.setText("START REST"); main.setEnabled(true); presets.setAlpha(1f);
+        }
+    }
+    private void playCompletionTone() {
+        try {
+            final ToneGenerator tone = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+            tone.startTone(ToneGenerator.TONE_PROP_BEEP2, 900);
+            handler.postDelayed(() -> tone.release(), 1200);
+        } catch (RuntimeException ex) {
+            android.util.Log.w("JohnsonRest", "Unable to play completion tone", ex);
         }
     }
     @Override protected void onResume() { super.onResume(); if (display != null) { refresh(); handler.removeCallbacks(tick); if (running) handler.post(tick); } }
