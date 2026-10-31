@@ -33,14 +33,14 @@ public class MainActivity extends Activity {
     private long endWall;
     private boolean completionPlayed = false;
     private final Runnable tick = new Runnable() { @Override public void run() { refresh(); if (running) handler.postDelayed(this, 250); } };
-    private final int bg = Color.rgb(15,18,22), fg = Color.WHITE, accent = Color.rgb(239, 91, 46);
+    private final int bg = Color.rgb(5,5,5), fg = Color.WHITE, accent = Color.rgb(239, 23, 27);
     private int dp(float v) { return (int)(getResources().getDisplayMetrics().density*v + .5f); }
     @Override public void onCreate(Bundle b) {
         super.onCreate(b);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         seconds = getPreferences(0).getInt("rest", 180);
         root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setGravity(Gravity.CENTER); root.setPadding(dp(22),dp(30),dp(22),dp(30)); root.setBackgroundColor(bg);
-        TextView title = new TextView(this); title.setText("JOHNSON STRENGTH"); title.setTextColor(accent); title.setTextSize(21); title.setTypeface(null,Typeface.BOLD); title.setGravity(Gravity.CENTER); root.addView(title);
+        TextView title = new TextView(this); title.setText("JOHNSON STRENGTH COMPANY\nREST TIMER"); title.setTextColor(accent); title.setTextSize(20); title.setTypeface(null,Typeface.BOLD); title.setGravity(Gravity.CENTER); title.setLineSpacing(dp(4), 1f); root.addView(title);
         status = new TextView(this); status.setText("READY FOR YOUR NEXT SET"); status.setTextColor(Color.LTGRAY); status.setTextSize(15); status.setGravity(Gravity.CENTER); LinearLayout.LayoutParams sl = new LinearLayout.LayoutParams(-1,dp(52)); sl.topMargin=dp(20); root.addView(status,sl);
         display = new TextView(this); display.setTextColor(fg); display.setTextSize(80); display.setTypeface(Typeface.DEFAULT,Typeface.BOLD); display.setGravity(Gravity.CENTER); root.addView(display,new LinearLayout.LayoutParams(-1,dp(150)));
         main = new Button(this); main.setText("START REST"); main.setTextSize(27); main.setAllCaps(false); main.setTextColor(Color.WHITE); main.setBackgroundTintList(android.content.res.ColorStateList.valueOf(accent)); LinearLayout.LayoutParams mp = new LinearLayout.LayoutParams(-1,dp(145)); mp.topMargin=dp(18); root.addView(main,mp); main.setOnClickListener(v -> { if (!running) start(); });
