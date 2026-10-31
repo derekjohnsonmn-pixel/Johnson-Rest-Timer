@@ -8,6 +8,8 @@
     <application
         android:theme="@android:style/Theme.Material.NoActionBar"
         android:label="Johnson Rest Timer"
+        android:icon="@drawable/jsc_icon"
+        android:roundIcon="@drawable/jsc_icon"
         android:usesCleartextTraffic="false">
 
         <activity
