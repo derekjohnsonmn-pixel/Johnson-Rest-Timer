@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         seconds = getPreferences(0).getInt("rest", 180);
         root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setGravity(Gravity.CENTER); root.setPadding(dp(22),dp(12),dp(22),dp(12)); root.setBackgroundColor(bg);
-        ImageView title = new ImageView(this); title.setImageResource(R.drawable.jsc_header); title.setScaleType(ImageView.ScaleType.FIT_CENTER); root.addView(title, new LinearLayout.LayoutParams(-1, dp(145)));
+        ImageView title = new ImageView(this); title.setImageResource(R.drawable.jsc_header); title.setScaleType(ImageView.ScaleType.FIT_CENTER); root.addView(title, new LinearLayout.LayoutParams(-1, dp(218)));
         status = new TextView(this); status.setText("READY FOR YOUR NEXT SET"); status.setTextColor(Color.LTGRAY); status.setTextSize(15); status.setGravity(Gravity.CENTER); LinearLayout.LayoutParams sl = new LinearLayout.LayoutParams(-1,dp(52)); sl.topMargin=dp(4); root.addView(status,sl);
         display = new TextView(this); display.setTextColor(fg); display.setTextSize(80); display.setTypeface(Typeface.DEFAULT,Typeface.BOLD); display.setGravity(Gravity.CENTER); root.addView(display,new LinearLayout.LayoutParams(-1,dp(110)));
         main = new Button(this); main.setText("START REST"); main.setTextSize(27); main.setAllCaps(false); main.setTextColor(Color.WHITE); main.setBackgroundTintList(android.content.res.ColorStateList.valueOf(accent)); LinearLayout.LayoutParams mp = new LinearLayout.LayoutParams(-1,dp(105)); mp.topMargin=dp(6); root.addView(main,mp); main.setOnClickListener(v -> { if (!running) start(); });
