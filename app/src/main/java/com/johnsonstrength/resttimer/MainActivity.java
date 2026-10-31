@@ -59,7 +59,9 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, RestAlarmReceiver.class);
         PendingIntent alarm = PendingIntent.getBroadcast(this, 12, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         PendingIntent open = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        alarms.setAlarmClock(new AlarmManager.AlarmClockInfo(endWall, open), alarm);
+        
+alarms.set(AlarmManager.RTC_WAKEUP, endWall, alarm);
+
         refresh(); handler.removeCallbacks(tick); handler.post(tick);
     }
     private void refresh() {
