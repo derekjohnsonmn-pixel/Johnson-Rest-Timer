@@ -18,6 +18,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.EditText;
 import android.text.InputType;
 
@@ -39,11 +40,11 @@ public class MainActivity extends Activity {
         super.onCreate(b);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         seconds = getPreferences(0).getInt("rest", 180);
-        root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setGravity(Gravity.CENTER); root.setPadding(dp(22),dp(30),dp(22),dp(30)); root.setBackgroundColor(bg);
-        TextView title = new TextView(this); title.setText("JOHNSON STRENGTH COMPANY\nREST TIMER"); title.setTextColor(accent); title.setTextSize(20); title.setTypeface(null,Typeface.BOLD); title.setGravity(Gravity.CENTER); title.setLineSpacing(dp(4), 1f); root.addView(title);
-        status = new TextView(this); status.setText("READY FOR YOUR NEXT SET"); status.setTextColor(Color.LTGRAY); status.setTextSize(15); status.setGravity(Gravity.CENTER); LinearLayout.LayoutParams sl = new LinearLayout.LayoutParams(-1,dp(52)); sl.topMargin=dp(20); root.addView(status,sl);
-        display = new TextView(this); display.setTextColor(fg); display.setTextSize(80); display.setTypeface(Typeface.DEFAULT,Typeface.BOLD); display.setGravity(Gravity.CENTER); root.addView(display,new LinearLayout.LayoutParams(-1,dp(150)));
-        main = new Button(this); main.setText("START REST"); main.setTextSize(27); main.setAllCaps(false); main.setTextColor(Color.WHITE); main.setBackgroundTintList(android.content.res.ColorStateList.valueOf(accent)); LinearLayout.LayoutParams mp = new LinearLayout.LayoutParams(-1,dp(145)); mp.topMargin=dp(18); root.addView(main,mp); main.setOnClickListener(v -> { if (!running) start(); });
+        root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setGravity(Gravity.CENTER); root.setPadding(dp(22),dp(12),dp(22),dp(12)); root.setBackgroundColor(bg);
+        ImageView title = new ImageView(this); title.setImageResource(R.drawable.jsc_header); title.setScaleType(ImageView.ScaleType.FIT_CENTER); root.addView(title, new LinearLayout.LayoutParams(-1, dp(145)));
+        status = new TextView(this); status.setText("READY FOR YOUR NEXT SET"); status.setTextColor(Color.LTGRAY); status.setTextSize(15); status.setGravity(Gravity.CENTER); LinearLayout.LayoutParams sl = new LinearLayout.LayoutParams(-1,dp(52)); sl.topMargin=dp(4); root.addView(status,sl);
+        display = new TextView(this); display.setTextColor(fg); display.setTextSize(80); display.setTypeface(Typeface.DEFAULT,Typeface.BOLD); display.setGravity(Gravity.CENTER); root.addView(display,new LinearLayout.LayoutParams(-1,dp(110)));
+        main = new Button(this); main.setText("START REST"); main.setTextSize(27); main.setAllCaps(false); main.setTextColor(Color.WHITE); main.setBackgroundTintList(android.content.res.ColorStateList.valueOf(accent)); LinearLayout.LayoutParams mp = new LinearLayout.LayoutParams(-1,dp(105)); mp.topMargin=dp(6); root.addView(main,mp); main.setOnClickListener(v -> { if (!running) start(); });
         stop = new Button(this); stop.setText("STOP"); stop.setAllCaps(false); stop.setTextSize(15);
         stop.setTextColor(Color.WHITE);
         stop.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(70,70,70)));
@@ -52,7 +53,7 @@ public class MainActivity extends Activity {
         root.addView(stop, stopParams);
         stop.setOnClickListener(v -> stopTimer());
         stop.setVisibility(View.INVISIBLE);
-        TextView hint = new TextView(this); hint.setText("REST DURATION"); hint.setTextColor(Color.LTGRAY); hint.setTextSize(14); hint.setGravity(Gravity.CENTER); LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(-1,dp(40)); hp.topMargin=dp(25); root.addView(hint,hp);
+        TextView hint = new TextView(this); hint.setText("REST DURATION"); hint.setTextColor(Color.LTGRAY); hint.setTextSize(14); hint.setGravity(Gravity.CENTER); LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(-1,dp(40)); hp.topMargin=dp(5); root.addView(hint,hp);
         presets = new LinearLayout(this); presets.setOrientation(LinearLayout.HORIZONTAL); root.addView(presets,new LinearLayout.LayoutParams(-1,dp(55)));
         for(int s:new int[]{60,90,120,180}) { Button p=new Button(this); p.setText(s+"s"); p.setTextSize(14); p.setAllCaps(false); LinearLayout.LayoutParams pp=new LinearLayout.LayoutParams(0,-1,1); pp.setMargins(dp(2),0,dp(2),0); presets.addView(p,pp); p.setOnClickListener(v -> choose(s)); }
         Button custom=new Button(this); custom.setText("CUSTOM TIME"); custom.setAllCaps(false); root.addView(custom,new LinearLayout.LayoutParams(-1,dp(52))); custom.setOnClickListener(v -> customTime());
