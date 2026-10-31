@@ -70,69 +70,9 @@ public class RestAlarmReceiver extends BroadcastReceiver {
 
         wakeLock.acquire(8000);
 
-        try {
-            Uri sound = RingtoneManager.getDefaultUri(
-                RingtoneManager.TYPE_ALARM
-            );
-
-            if (sound == null) {
-                sound = RingtoneManager.getDefaultUri(
-                    RingtoneManager.TYPE_NOTIFICATION
-                );
-            }
-
-            Ringtone ringtone =
-                RingtoneManager.getRingtone(context, sound);
-
-            if (ringtone == null) {
-                throw new Exception("No alarm sound");
-            }
-
-            ringtone.setAudioAttributes(
-                new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(
-                        AudioAttributes.CONTENT_TYPE_SONIFICATION
-                    )
-                    .build()
-            );
-
-            ringtone.play();
-
-            new Handler(Looper.getMainLooper())
-                .postDelayed(() -> {
-                    try {
-                        ringtone.stop();
-                    } finally {
-                        if (wakeLock.isHeld()) {
-                            wakeLock.release();
-                        }
-                        pending.finish();
-                    }
-                }, 3000);
-
-        } catch (Exception e) {
-            try {
-                ToneGenerator tone = new ToneGenerator(
-                    AudioManager.STREAM_ALARM, 100
-                );
-                tone.startTone(
-                    ToneGenerator.TONE_PROP_BEEP, 1000
-                );
-                new Handler(Looper.getMainLooper())
-                    .postDelayed(() -> {
-                        tone.release();
-                        if (wakeLock.isHeld()) {
-                            wakeLock.release();
-                        }
-                        pending.finish();
-                    }, 1500);
-            } catch (Exception ignored) {
-                if (wakeLock.isHeld()) {
-                    wakeLock.release();
-                }
-                pending.finish();
-            }
-        }
+        RestSound.play(context, () -> {
+            if (wakeLock.isHeld()) wakeLock.release();
+            pending.finish();
+        });
     }
 }
